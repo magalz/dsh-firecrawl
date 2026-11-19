@@ -10,9 +10,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
-      # No `version:` — the action reads package.json's `packageManager`, and
-      # specifying both is a hard error.
+      # pnpm is pinned here, NOT via package.json's `packageManager`: a pin
+      # there forces DSH's bundled pnpm into a self-switch when it prepares
+      # this git-hosted plugin, and pnpm 11.28.5 on Windows provisions an
+      # empty store/v11/links/@/pnpm/<version> entry, so the spawned
+      # node_modules/pnpm/bin/pnpm.mjs is missing and the install dies with
+      # ERR_PNPM_PREPARE_PACKAGE. The prepare step now runs with the host
+      # pnpm; CI keeps the exact version the lockfile was cut with.
       - uses: pnpm/action-setup@v4
+        with:
+          version: 11.20.0
       - uses: actions/setup-node@v5
         with:
           node-version: 24
